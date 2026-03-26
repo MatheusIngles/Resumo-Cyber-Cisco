@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masterclass: Segurança de Redes Cisco</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-base: #09090b; /* Zinc 950 */
+            --bg-panel: #18181b; /* Zinc 900 */
+            --bg-card: #27272a; /* Zinc 800 */
+            --text-main: #f4f4f5; /* Zinc 100 */
+            --text-muted: #a1a1aa; /* Zinc 400 */
+            --accent-primary: #06b6d4; /* Cyan 500 */
+            --accent-glow: rgba(6, 182, 212, 0.4);
+            --danger: #ef4444; /* Red 500 */
+            --success: #10b981; /* Emerald 500 */
+            --border-color: #3f3f46; /* Zinc 700 */
+            
+            --sidebar-width: 320px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Fira Sans', sans-serif;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Sidebar / Index */
+        #sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            color: var(--accent-primary);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .index-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 10px;
+            list-style: none;
+        }
+
+        .index-list::-webkit-scrollbar { width: 6px; }
+        .index-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+        .index-item {
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .index-item:hover {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+        }
+
+        .index-item.active {
+            background-color: rgba(6, 182, 212, 0.1);
+            color: var(--accent-primary);
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .module-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin: 15px 0 5px 15px;
+            font-weight: 700;
+        }
+
+        /* Main Presentation Area */
+        #main-view {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #slides-container {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        /* Slide Component */
+        .slide {
+            width: 100%;
+            max-width: 1300px;
+            height: 100%;
+            background-color: var(--bg-panel);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            padding: 50px 60px;
+            position: absolute;
+            animation: slideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            overflow-y: auto;
+        }
+
+        .slide::-webkit-scrollbar { width: 8px; }
+        .slide::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+        .slide.active { display: flex; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Slide Typography & Layout */
+        .slide-tag {
+            display: inline-block;
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-primary);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            width: fit-content;
+        }
+
+        .slide-title {
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            line-height: 1.2;
+        }
+
+        .slide-title span { color: var(--accent-primary); }
+
+        .content {
+            flex-grow: 1;
+            font-size: 18px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .content p { margin-bottom: 10px; }
+        .content strong { color: var(--text-main); font-weight: 700; }
+
+        /* Lists */
+        .grid-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            list-style: none;
+        }
+
+        .grid-list.cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-list.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-list.cols-4 { grid-template-columns: repeat(4, 1fr); gap: 15px;}
+
+        .card-item {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-item i {
+            color: var(--accent-primary);
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        ul.standard-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        ul.standard-list li {
+            position: relative;
+            padding-left: 35px;
+        }
+
+        ul.standard-list li i {
+            position: absolute;
+            left: 0;
+            top: 5px;
+            color: var(--accent-primary);
+            font-size: 18px;
+        }
+
+        /* Code & Tables */
+        .code-block {
+            background-color: #0d1117;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-primary);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            color: #a6e22e; /* Code Green */
+            white-space: pre-wrap;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .code-comment { color: #75715e; font-style: italic; }
+        .code-keyword { color: #f92672; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        th {
+            background-color: rgba(6, 182, 212, 0.1);
+            color: var(--accent-primary);
+            font-weight: 700;
+        }
+
+        /* Bottom Controls */
+        #bottom-bar {
+            height: 70px;
+            background-color: var(--bg-panel);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        .btn {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--accent-primary);
+            color: var(--bg-base);
+            border-color: var(--accent-primary);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #progress-container {
+            flex-grow: 1;
+            margin: 0 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .progress-track {
+            height: 6px;
+            background-color: var(--bg-card);
+            border-radius: 3px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-primary);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* Title Slide Special */
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-top: 8px solid var(--accent-primary);
+        }
+
+        .title-slide h1 {
+            font-size: 60px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+        .title-slide h1 span { color: var(--accent-primary); }
+        .title-slide p { font-size: 24px; color: var(--text-muted); }
+
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR / INDEX -->
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fa-solid fa-shield-halved"></i> Masterclass</h2>
+        </div>
+        <ul class="index-list" id="index-list">
+            <!-- Populated via JS -->
+        </ul>
+    </div>
+
+    <!-- MAIN VIEW -->
+    <div id="main-view">
+        <div id="slides-container">
+            
+            <!-- CAPA -->
+            <div class="slide title-slide" data-title="Início" data-chapter="Geral">
+                <h1>Masterclass:<br><span>Segurança de Redes Cisco</span></h1>
+                <p>Curso exaustivo baseado nos resumos NFP, AAA, ACLs e Mitigação de Ameaças.</p>
+                <div style="margin-top: 40px; color: var(--text-muted); font-size: 16px;">
+                    <i class="fa-solid fa-keyboard"></i> Use as setas ← e → para navegar
+                </div>
+            </div>
+
+            <!-- ================= CAPÍTULO 1 ================= -->
+            <div class="slide" data-title="Impacto e Continuidade" data-chapter="Módulo 1: Protegendo Redes">
+                <span class="slide-tag">Módulo 1.1</span>
+                <h2 class="slide-title">Segurança e <span>Continuidade de Negócios</span></h2>
+                <div class="content">
+                    <p>A segurança da rede está diretamente relacionada à <strong>continuidade dos negócios</strong> de uma organização.</p>
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-bolt"></i><strong>O que as violações interrompem:</strong> Comércio eletrônico, privacidade das pessoas e a integridade das informações.</li>
+                        <li><i class="fa-solid fa-chart-line-down"></i><strong>Consequências diretas:</strong> Perda de receita para empresas, roubo de propriedade intelectual, ações judiciais e ameaças à segurança pública.</li>
+                        <li><i class="fa-solid fa-brain"></i><strong>Inteligência:</strong> Muitas ferramentas estão disponíveis, incluindo o <strong>Cisco Talos Intelligence Group</strong>, para adaptar e implementar mitigação de ameaças.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Ativos e Prevenção DLP" data-chapter="Módulo 1: Protegendo Redes">
+                <span class="slide-tag">Módulo 1.1</span>
+                <h2 class="slide-title">Vetores de Ataque e <span>Perda de Dados (DLP)</span></h2>
+                <div class="content">
+                    <p>Um <strong>vetor de ataque</strong> é um caminho pelo qual um atacante obtém acesso a um servidor, equipamento ou rede (originários de dentro ou fora da rede).</p>
+                    <p>Os dados são, provavelmente, o ativo <strong>mais valioso</strong> de uma organização. Requerem implementação de DLP combinando medidas <em>estratégicas, operacionais e táticas</em>.</p>
+                    <p><strong>Vetores comuns de perda de dados:</strong></p>
+                    <ul class="grid-list cols-3" style="font-size: 16px;">
+                        <li class="card-item"><i class="fa-solid fa-envelope"></i> E-mail e Redes Sociais</li>
+                        <li class="card-item"><i class="fa-solid fa-unlock"></i> Dispositivos não criptografados</li>
+                        <li class="card-item"><i class="fa-solid fa-cloud-arrow-up"></i> Armazenamento em nuvem</li>
+                        <li class="card-item"><i class="fa-solid fa-usb"></i> Mídia removível</li>
+                        <li class="card-item"><i class="fa-solid fa-print"></i> Cópias impressas</li>
+                        <li class="card-item"><i class="fa-solid fa-id-badge"></i> Controle de acesso inadequado</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Redes de Campus, SOHO e WAN" data-chapter="Módulo 1: Protegendo Redes">
+                <span class="slide-tag">Módulo 1.2</span>
+                <h2 class="slide-title">Topologias: <span>Campus, SOHO e WAN</span></h2>
+                <div class="content">
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-building-columns"></i><strong>Redes de Campus:</strong> LANs interconectadas em área geográfica limitada.
+                            <br><span style="font-size: 16px; color: var(--text-muted);"><em>Elementos de Defesa-em-Profundidade exigidos:</em> VPN, Firewall ASA, IPS, Switches L3, Switches L2, ESA/WSA, Servidor AAA e Anfitriões.</span>
+                        </li>
+                        <li><i class="fa-solid fa-house-signal"></i><strong>Redes SOHO (Small Office/Home Office):</strong> Protegidas por roteadores de nível de consumo. Fornecem recursos integrados de firewall e conexões sem fio seguras usando <strong>criptografia WPA2</strong>.</li>
+                        <li><i class="fa-solid fa-globe"></i><strong>WANs:</strong> Abrangem ampla área geográfica. Os profissionais de segurança devem usar dispositivos seguros especificamente na <strong>borda da rede</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Segurança Física e Lógica em DC" data-chapter="Módulo 1: Protegendo Redes">
+                <span class="slide-tag">Módulo 1.2</span>
+                <h2 class="slide-title">Segurança em <span>Data Centers</span></h2>
+                <div class="content">
+                    <p>Data centers abrigam dados confidenciais externos. A segurança física exige <strong>Traps de Segurança</strong> (Armadilhas/Eclusas):</p>
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-id-card"></i><strong>Perímetro Externo (Primeira Área):</strong> Exige uso de ID de crachá.</li>
+                        <li><i class="fa-solid fa-fingerprint"></i><strong>Perímetro Interno (Segunda Porta):</strong> Após entrar no trap, exige verificações de biometria (reconhecimento facial, impressões digitais).</li>
+                    </ul>
+                    <hr style="border-color: var(--border-color); margin: 15px 0;">
+                    <p><strong>Cisco Secure Data Center:</strong> Solução que bloqueia ameaças internas e externas na borda. Fornece três componentes principais:</p>
+                    <div style="display:flex; gap: 20px; font-weight:700; color:var(--text-main);">
+                        <span>1. Segmentação Segura</span> | <span>2. Defesa contra Ameaças</span> | <span>3. Visibilidade</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Nuvem, VMs e Redes sem Fronteiras" data-chapter="Módulo 1: Protegendo Redes">
+                <span class="slide-tag">Módulo 1.2</span>
+                <h2 class="slide-title">Nuvem, VMs e <span>BYOD</span></h2>
+                <div class="content">
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-cloud"></i><strong>Computação em Nuvem:</strong> Serviços para estender capacidade sem adicionar infraestrutura. Redes reais consistem em servidores físicos/virtuais.</li>
+                        <li><i class="fa-solid fa-server"></i><strong>Ameaças Específicas de VMs:</strong> Como data centers usam muitas VMs, elas são propensas a ataques direcionados: <strong>hiperjacking, ativação instantânea e tempestades antivírus</strong>.</li>
+                        <li><i class="fa-solid fa-mobile-screen"></i><strong>BYOD e Rede Sem Fronteiras:</strong> Usuários acessam informações corporativas de muitos locais, muitos tipos de endpoints, usando vários métodos. 
+                        A borda da rede tornou-se turva. Dispositivos Cisco apoiam características <strong>MDM (Mobile Device Management)</strong> para mitigar isso.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ================= CAPÍTULO 2 ================= -->
+            <div class="slide" data-title="Terminologia e Gestão de Riscos" data-chapter="Módulo 2: Ameaças à Rede">
+                <span class="slide-tag">Módulo 2.1</span>
+                <h2 class="slide-title">Conceitos e <span>Gestão de Risco</span></h2>
+                <div class="content">
+                    <p>Segurança exige compreender os termos: <strong>Ameaça, Vulnerabilidade, Superfície de Ataque, Exploração e Risco</strong>.</p>
+                    <p><strong>Gestão de Riscos:</strong> O processo que equilibra custos operacionais de medidas de proteção com os ganhos de proteger o ativo. As 4 formas de gerenciar são:</p>
+                    <ul class="grid-list cols-4" style="font-size: 15px;">
+                        <li class="card-item"><i class="fa-solid fa-check-double"></i> <strong>Aceitação de Risco</strong><br>Assumir as consequências.</li>
+                        <li class="card-item"><i class="fa-solid fa-ban"></i> <strong>Prevenção de Risco</strong><br>Evitar a atividade que gera o risco.</li>
+                        <li class="card-item"><i class="fa-solid fa-arrow-trend-down"></i> <strong>Redução de Risco</strong><br>Implementar controles para diminuir o impacto.</li>
+                        <li class="card-item"><i class="fa-solid fa-file-contract"></i> <strong>Transferência de Risco</strong><br>Repassar o ônus (Ex: Seguros cibernéticos).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Tipos de Hackers e Atores" data-chapter="Módulo 2: Ameaças à Rede">
+                <span class="slide-tag">Módulo 2.1</span>
+                <h2 class="slide-title">Hackers e <span>Atores de Ameaça</span></h2>
+                <div class="content">
+                    <ul class="grid-list cols-3">
+                        <li class="card-item"><i class="fa-solid fa-user-shield" style="color: #fff"></i><strong>White Hat</strong><br>Hackers éticos, usam habilidades para propósitos legais/bons.</li>
+                        <li class="card-item"><i class="fa-solid fa-user-ninja" style="color: #888"></i><strong>Grey Hat</strong><br>Cometem crimes/atos antiéticos, mas NÃO para ganho pessoal ou dano.</li>
+                        <li class="card-item"><i class="fa-solid fa-user-secret" style="color: #ef4444"></i><strong>Black Hat</strong><br>Criminosos que violam sistemas para ganho pessoal/motivos maliciosos.</li>
+                    </ul>
+                    <p style="margin-top: 20px;"><strong>Outros Atores de Ameaça:</strong> Script kiddies, corretores de vulnerabilidade, hacktivistas, criminosos cibernéticos e hackers patrocinados pelo Estado.</p>
+                    <p>Muitos ataques são evitados compartilhando <strong>IOCs</strong> (Indicadores de Comprometimento). Organizações como <strong>CISA</strong> e <strong>NCSA</strong> promovem segurança cibernética.</p>
+                </div>
+            </div>
+
+            <div class="slide" data-title="O Arsenal Hacker (Ferramentas)" data-chapter="Módulo 2: Ameaças à Rede">
+                <span class="slide-tag">Módulo 2.2</span>
+                <h2 class="slide-title">Ferramentas de <span>Ataque</span></h2>
+                <div class="content">
+                    <p>As ferramentas tornaram-se mais sofisticadas e automatizadas. A maioria é baseada em Linux/UNIX. O profissional DEVE conhecê-las:</p>
+                    <ul class="grid-list cols-4" style="font-size: 15px;">
+                        <li class="card-item">Crackers de senhas</li>
+                        <li class="card-item">Hacking sem fio</li>
+                        <li class="card-item">Scanners de segurança/rede</li>
+                        <li class="card-item">Ferramentas de criação de pacotes</li>
+                        <li class="card-item">Sniffers de pacotes</li>
+                        <li class="card-item">Detectores de rootkit</li>
+                        <li class="card-item">Fuzzers (pesquisa vuln.)</li>
+                        <li class="card-item">Ferramentas forenses</li>
+                        <li class="card-item">Depuradores (Debuggers)</li>
+                        <li class="card-item">Sistemas operacionais de hacking</li>
+                        <li class="card-item">Ferramentas de criptografia</li>
+                        <li class="card-item">Exploradores de vulnerabilidade</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Categorias de Ataques de Rede" data-chapter="Módulo 2: Ameaças à Rede">
+                <span class="slide-tag">Módulo 2.4 / 2.5</span>
+                <h2 class="slide-title">Categorias de <span>Ataques</span></h2>
+                <div class="content">
+                    <p>Os ataques de rede são classificados em categorias específicas de acordo com seu comportamento e objetivo:</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 15px;">
+                        <div class="card-item"><strong style="color:var(--accent-primary);"><i class="fa-solid fa-headphones"></i> Espionagem (Eavesdropping):</strong> Interceptação não autorizada de comunicações de rede para ler dados confidenciais (ex: leitura de pacotes em texto claro). Mitigado por IPsec/Criptografia.</div>
+                        <div class="card-item"><strong style="color:var(--accent-primary);"><i class="fa-solid fa-file-pen"></i> Modificação de Dados:</strong> Alteração de dados em trânsito antes que cheguem ao destino, violando severamente a integridade da informação.</div>
+                        <div class="card-item"><strong style="color:var(--accent-primary);"><i class="fa-solid fa-mask"></i> Falsificação (Spoofing):</strong> Falsificação de endereço IP ou MAC para fingir ser um dispositivo ou usuário confiável e legítimo na rede.</div>
+                        <div class="card-item"><strong style="color:var(--accent-primary);"><i class="fa-solid fa-key"></i> Ataques baseados em senha:</strong> Tentativas de descobrir senhas via força bruta, ataques de dicionário ou engenharia social para obter acesso aos sistemas.</div>
+                        <div class="card-item"><strong style="color:var(--accent-primary);"><i class="fa-solid fa-ban"></i> Negação de Serviço (DoS):</strong> Sobrecarga intencional de um sistema ou rede com tráfego massivo ou pacotes mal formatados para torná-lo indisponível.</div>
+                        <div class="card-item"><strong style="color:var(--accent-primary);"><i class="fa-solid fa-people-arrows"></i> Man-in-the-Middle (MitM):</strong> O atacante se posiciona secretamente entre duas partes comunicantes para interceptar, ler ou alterar o tráfego sem que as partes saibam.</div>
+                        <div class="card-item"><strong style="color:var(--accent-primary);"><i class="fa-solid fa-unlock"></i> Chave Comprometida:</strong> Obtenção não autorizada da chave secreta usada para criptografar uma comunicação, tornando a proteção inútil e os dados legíveis.</div>
+                        <div class="card-item"><strong style="color:var(--accent-primary);"><i class="fa-solid fa-search"></i> Ataque de Farejador (Sniffer):</strong> Uso de software ou hardware (packet sniffer) para ler e analisar todo o tráfego da rede que passa por aquele segmento físico ou lógico.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Aprofundamento: Vírus e Worms" data-chapter="Módulo 2: Ameaças à Rede">
+                <span class="slide-tag">Módulo 2.3 - Deep Dive</span>
+                <h2 class="slide-title">Dissecando <span>Vírus e Worms</span></h2>
+                <div class="content">
+                    <p>Antimalwares frequentemente não se atualizam rápido o suficiente. Compreenda a mecânica:</p>
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-virus"></i><strong>Vírus:</strong> Insere cópia de si mesmo em outro programa. <strong>EXIGE que o usuário execute um programa host.</strong>
+                            <ul style="margin-left: 30px; margin-top: 10px; font-size:16px;">
+                                <li><strong>Vírus de Setor de Inicialização (Boot Sector):</strong> Ataca o MBR do disco rígido, carregando antes do próprio SO.</li>
+                                <li><strong>Vírus de Macro:</strong> Escrito em linguagens de macro embutidas em arquivos comuns (Word/Excel).</li>
+                                <li><strong>Vírus Polimórfico:</strong> Muda sua própria assinatura a cada infecção para evadir antivírus baseados em assinatura.</li>
+                            </ul>
+                        </li>
+                        <li><i class="fa-solid fa-worm"></i><strong>Worms (Vermes):</strong> Causam danos consumindo banda, mas <strong>correm sozinhos</strong> na rede (não precisam de interação humana pós-infecção). Consistem em 3 componentes:
+                            <ul style="margin-left: 30px; margin-top: 10px; color: var(--accent-primary); list-style: circle; font-size:16px;">
+                                <li>Habilitação de vulnerabilidade (encontra a brecha)</li>
+                                <li>Mecanismo de propagação (espalha-se lateralmente)</li>
+                                <li>Carga útil (Payload malicioso)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Aprofundamento: Cavalos de Tróia e Outros" data-chapter="Módulo 2: Ameaças à Rede">
+                <span class="slide-tag">Módulo 2.3 - Deep Dive</span>
+                <h2 class="slide-title">Dissecando <span>Trojans e Malwares Avançados</span></h2>
+                <div class="content">
+                    <p><strong>Cavalos de Tróia</strong> parecem legítimos, mas exploram privilégios. Classificados pelos danos que causam:</p>
+                    <ul class="grid-list cols-3" style="font-size: 14px; gap: 10px;">
+                        <li class="card-item" style="padding:15px;"><i class="fa-solid fa-laptop-house"></i><strong>Acesso Remoto (RAT):</strong> Permite controle total do invasor ao PC da vítima.</li>
+                        <li class="card-item" style="padding:15px;"><i class="fa-solid fa-share-from-square"></i><strong>Envio de Dados:</strong> Captura e exfiltra dados confidenciais silenciosamente.</li>
+                        <li class="card-item" style="padding:15px;"><i class="fa-solid fa-bomb"></i><strong>Destrutivo:</strong> Destrói arquivos, corrompe o SO ou formata discos.</li>
+                        <li class="card-item" style="padding:15px;"><i class="fa-solid fa-server"></i><strong>Proxy Trojan:</strong> Usa o PC da vítima como intermediário para ocultar origem de ataques.</li>
+                        <li class="card-item" style="padding:15px;"><i class="fa-solid fa-shield-virus"></i><strong>Desabilitador (Security Disabler):</strong> Desativa Antivírus e Firewall locais.</li>
+                        <li class="card-item" style="padding:15px;"><i class="fa-solid fa-keyboard"></i><strong>Keylogger:</strong> Registra todas as teclas digitadas (senhas, cartões).</li>
+                    </ul>
+                    
+                    <p style="margin-top: 10px;"><strong>Outras Ameaças Notórias:</strong></p>
+                    <ul style="font-size:15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-left:20px;">
+                        <li><strong>Ransomware:</strong> Criptografa arquivos e exige pagamento (criptomoeda).</li>
+                        <li><strong>Rootkits:</strong> Ganham privilégios em nível de kernel, ocultando sua existência.</li>
+                        <li><strong>Scareware:</strong> Pop-ups falsos de alerta de vírus para extorquir dinheiro.</li>
+                        <li><strong>Spyware/Adware:</strong> Espionagem comportamental e anúncios não solicitados.</li>
+                        <li><strong>Logic Bombs (Bombas Lógicas):</strong> Malwares dormentes ativados por um gatilho específico (ex: uma data ou exclusão de usuário).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Ataques de Reconhecimento e Acesso" data-chapter="Módulo 2: Ameaças à Rede">
+                <span class="slide-tag">Módulo 2.4</span>
+                <h2 class="slide-title">Ataques de <span>Reconhecimento e Acesso</span></h2>
+                <div class="content">
+                    <p>Os ataques também vêm de fora (Reconhecimento, Acesso e DoS).</p>
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-eye"></i><strong>Reconhecimento:</strong> Coleta de informações. Descoberta não autorizada de sistemas. <em>Precedem ataques de acesso ou DoS.</em> Técnicas:
+                            <ul style="font-size:16px; margin-top:5px; margin-left:30px; list-style:square;">
+                                <li>Consulta de informações do destino</li>
+                                <li>Varredura de ping da rede (Ping sweep)</li>
+                                <li>Varredura de portas de IPs ativos (Port scan)</li>
+                                <li>Varreduras de vulnerabilidades e Execução de ferramentas de exploração.</li>
+                            </ul>
+                        </li>
+                        <li><i class="fa-solid fa-door-open"></i><strong>Ataques de Acesso:</strong> Exploram vulnerabilidades em serviços (autenticação, FTP, Web). Incluem:
+                            <span style="font-size:16px; display:block; margin-top:5px;">Senha, Spoofing, Exploração de confiança, Redirecionamentos de porta, Man-in-the-Middle e Estouro de buffer.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Ataques de Engenharia Social" data-chapter="Módulo 2: Ameaças à Rede">
+                <span class="slide-tag">Módulo 2.4</span>
+                <h2 class="slide-title">Ataques de <span>Engenharia Social</span></h2>
+                <div class="content">
+                    <p>É uma subcategoria de ataques de acesso que <strong>tenta manipular indivíduos</strong> para executarem ações inseguras ou divulgarem informações confidenciais.</p>
+                    <p>Lista completa de ataques documentados:</p>
+                    <ul class="grid-list cols-3" style="font-size: 15px;">
+                        <li class="card-item"><i class="fa-solid fa-masks-theater"></i> Uso de pretextos</li>
+                        <li class="card-item"><i class="fa-solid fa-fish"></i> Phishing</li>
+                        <li class="card-item"><i class="fa-solid fa-crosshairs"></i> Spear phishing</li>
+                        <li class="card-item"><i class="fa-solid fa-envelope"></i> Spam</li>
+                        <li class="card-item"><i class="fa-solid fa-handshake"></i> Algo por algo (Quid pro quo)</li>
+                        <li class="card-item"><i class="fa-solid fa-worm"></i> Isca (Baiting)</li>
+                        <li class="card-item"><i class="fa-solid fa-user-tie"></i> Falsificação de identidade</li>
+                        <li class="card-item"><i class="fa-solid fa-door-open"></i> Uso não autorizado (Tailgating)</li>
+                        <li class="card-item"><i class="fa-solid fa-eye"></i> Surfe nos ombros</li>
+                        <li class="card-item"><i class="fa-solid fa-trash"></i> Lixeira (Dumpster diving)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Ataques DoS, DDoS, Buffer Overflow e Mirai" data-chapter="Módulo 2: Ameaças à Rede">
+                <span class="slide-tag">Módulo 2.5</span>
+                <h2 class="slide-title">Ataques <span>DoS, DDoS e Mirai</span></h2>
+                <div class="content">
+                    <ul class="standard-list" style="font-size: 17px;">
+                        <li><i class="fa-solid fa-ban"></i><strong>DoS:</strong> Interrupção de serviços. Dois tipos: Quantidade esmagadora de tráfego OU pacotes formatados com códigos maliciosos.</li>
+                        <li><i class="fa-solid fa-network-wired"></i><strong>DDoS:</strong> Aumenta em magnitude vindo de fontes coordenadas. Termos associados: <em>zumbis, bots, botnet, manipuladores e botmaster</em>.</li>
+                        <li><i class="fa-solid fa-memory"></i><strong>Buffer Overflow DoS:</strong> O objetivo do ator de ameaça é encontrar uma falha de memória em um servidor e explorá-la, sobrecarregando com valores inesperados para tornar inoperável.</li>
+                        <li><i class="fa-solid fa-robot"></i><strong>Mirai:</strong> Malware que visa dispositivos IoT com login padrão. Usa ataque de dicionário de força bruta visando utilitários BusyBox baseados em Linux.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Técnicas de Evasão" data-chapter="Módulo 2: Ameaças à Rede">
+                <span class="slide-tag">Módulo 2.5</span>
+                <h2 class="slide-title">Técnicas de <span>Evasão</span></h2>
+                <div class="content">
+                    <p>Muitos ataques usam técnicas de evasão furtiva para disfarçar a carga útil (payload) do ataque e burlar sistemas de segurança. Os 9 métodos documentados incluem:</p>
+                    <ul class="grid-list cols-3" style="font-size: 15px;">
+                        <li class="card-item">Criptografia e Encapsulamento</li>
+                        <li class="card-item">Exaustão de Recursos</li>
+                        <li class="card-item">Fragmentação de Tráfego</li>
+                        <li class="card-item">Interpretação errada de Protocolo</li>
+                        <li class="card-item">Substituição de Tráfego</li>
+                        <li class="card-item">Inserção de Tráfego</li>
+                        <li class="card-item">Rotação (Pivoting)</li>
+                        <li class="card-item">Rootkits</li>
+                        <li class="card-item">Proxies</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ================= CAPÍTULO 3 ================= -->
+            <div class="slide" data-title="O Profissional e Certificações" data-chapter="Módulo 3: Mitigação de Ameaças">
+                <span class="slide-tag">Módulo 3.0 / 3.1</span>
+                <h2 class="slide-title">O Profissional e <span>Certificações</span></h2>
+                <div class="content">
+                    <p>Profissionais de segurança garantem <strong>garantia de dados</strong> (data assurance), mantendo integridade e confidencialidade. Devem se manter informados conforme ameaças evoluem.</p>
+                    
+                    <div style="display:flex; gap:40px; margin-top: 20px;">
+                        <div>
+                            <strong style="color:var(--accent-primary);">Organizações para se manter informado:</strong>
+                            <ul style="margin-left:20px; font-size: 17px; margin-top:10px;">
+                                <li>SANS, Mitre, FIRST, SecurityNewsWire, ISC2, CIS</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong style="color:var(--accent-primary);">Certificações Reconhecidas:</strong>
+                            <ul style="margin-left:20px; font-size: 17px; margin-top:10px;">
+                                <li>GIAC, ISC2, ISACA, EC-Council, CWSP</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="A Tríade CIA e InfoSec" data-chapter="Módulo 3: Mitigação de Ameaças">
+                <span class="slide-tag">Módulo 3.1</span>
+                <h2 class="slide-title">InfoSec e a <span>Tríade CIA</span></h2>
+                <div class="content">
+                    <p>A segurança da informação trata da proteção da informação e sistemas contra acesso, uso, divulgação, interrupção, modificação ou destruição não autorizados.</p>
+                    <p>A <strong>Tríade da CIA</strong> serve como base conceitual para o campo inteiro, consistindo em três componentes absolutos:</p>
+                    
+                    <ul class="grid-list cols-3" style="margin-top:20px;">
+                        <li class="card-item" style="text-align:center;">
+                            <i class="fa-solid fa-user-secret" style="font-size:40px;"></i>
+                            <h3 style="color:#fff; margin:10px 0;">Confidencialidade</h3>
+                        </li>
+                        <li class="card-item" style="text-align:center;">
+                            <i class="fa-solid fa-shield-check" style="font-size:40px;"></i>
+                            <h3 style="color:#fff; margin:10px 0;">Integridade</h3>
+                        </li>
+                        <li class="card-item" style="text-align:center;">
+                            <i class="fa-solid fa-server" style="font-size:40px;"></i>
+                            <h3 style="color:#fff; margin:10px 0;">Disponibilidade (Availability)</h3>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="ISO 27002 e Políticas de Segurança" data-chapter="Módulo 3: Mitigação de Ameaças">
+                <span class="slide-tag">Módulo 3.2</span>
+                <h2 class="slide-title">Normas e <span>Políticas</span></h2>
+                <div class="content">
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-book"></i><strong>14 Domínios ISO/IEC 27002:</strong> Servem para organizar o vasto domínio de informações. Têm paralelos com a certificação CISSP. Servem como <em>base comum</em> para padrões organizacionais.</li>
+                        <li><i class="fa-solid fa-file-contract"></i><strong>Políticas de Segurança:</strong> Definem atividades permitidas. Incluem: identificação/autenticação, senhas, política de uso aceitável (AUP), acesso remoto, manutenção e tratamento de incidentes.</li>
+                        <li><i class="fa-solid fa-pen-nib"></i><strong>Documento Vivo:</strong> Atualizadas regularmente conforme mudam tecnologia/negócios. Precisa englobar BYOD, regulamentos externos, leis e o código de ética INFOSEC.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Anatomia das Políticas (Foco em Exames)" data-chapter="Módulo 3: Mitigação de Ameaças">
+                <span class="slide-tag">Módulo 3.2 - Tópico de Prova (ENADE)</span>
+                <h2 class="slide-title">Anatomia das <span>Políticas de Segurança</span></h2>
+                <div class="content">
+                    <p>As políticas de segurança corporativa são divididas em seções específicas. É crucial saber diferenciar o objetivo de cada uma, pois isso é <strong>frequentemente cobrado em exames (como a questão do ENADE)</strong>:</p>
+                    
+                    <ul class="standard-list" style="font-size: 16px;">
+                        <li><i class="fa-solid fa-id-card-clip"></i><strong style="color:var(--accent-primary); font-size:18px;">Política de Identificação e Autenticação:</strong>
+                            <br>Esta é a seção estritamente responsável por especificar que <strong>apenas indivíduos autorizados</strong> podem ter acesso aos dados corporativos. Ela define como um usuário comprova quem ele é (senhas, biometria, tokens) ANTES de receber acesso.
+                        </li>
+                        <li><i class="fa-solid fa-file-signature"></i><strong style="color:var(--text-main);">Política de Uso Aceitável (AUP - Acceptable Use Policy):</strong>
+                            <br>Não trata de autorizar o acesso, mas sim de definir <em>o que os usuários podem ou não fazer</em> com os recursos da empresa DEPOIS que já estão logados e autenticados (ex: proibição de acessar sites de jogos ou redes sociais).
+                        </li>
+                        <li><i class="fa-solid fa-building-user"></i><strong style="color:var(--text-main);">Política de Acesso Remoto:</strong>
+                            <br>Define os requisitos técnicos e de segurança para usuários que se conectam à rede da empresa a partir do exterior (ex: uso obrigatório de VPN e tokens RSA).
+                        </li>
+                    </ul>
+
+                    <div style="background-color: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--success); padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 15px;">
+                        <strong style="color:var(--success);"><i class="fa-solid fa-lightbulb"></i> Gabarito de Prova:</strong> Se a questão perguntar qual política garante a garantia de dados especificando que apenas <strong>indivíduos autorizados</strong> acessem dados corporativos, a resposta correta será SEMPRE <strong>"Política de identificação e autenticação"</strong>. As alternativas (AUP) ou declarações de âmbito tratam do comportamento pós-login, e não da blindagem do acesso inicial.
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Cebola vs Alcachofra e Pentest" data-chapter="Módulo 3: Mitigação de Ameaças">
+                <span class="slide-tag">Módulo 3.3</span>
+                <h2 class="slide-title">Defesa em Profundidade: <span>Cebola vs Alcachofra</span></h2>
+                <div class="content">
+                    <p>Analogias comuns para a defesa em profundidade mudaram:</p>
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-layer-group"></i><strong>Segurança em Cebola:</strong> Legado. O agente de ameaça teria que descascar a rede camada por camada de maneira sequencial.</li>
+                        <li><i class="fa-solid fa-leaf"></i><strong>Segurança em Alcachofra:</strong> A evolução das redes sem fronteiras mudou a analogia. Beneficia o ator de ameaça, pois não precisam remover todas as camadas, <em>só certas folhas</em> (vetores periféricos) para atingir os dados.</li>
+                    </ul>
+                    <hr style="border-color: var(--border-color); margin: 15px 0;">
+                    <p><i class="fa-solid fa-vial-virus" style="color:var(--accent-primary);"></i> <strong>Testes de Penetração:</strong> Ferramentas desenvolvidas para validar a segurança.<br>
+                    <i class="fa-solid fa-satellite-dish" style="color:var(--accent-primary);"></i> <strong>Inteligência de Ameaças:</strong> Serviços como <em>Cisco Talos Threat Intelligence Group</em> permitem troca de IOCs e técnicas de mitigação.</p>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Melhores Práticas de Mitigação" data-chapter="Módulo 3: Mitigação de Ameaças">
+                <span class="slide-tag">Módulo 3.4</span>
+                <h2 class="slide-title">Melhores Práticas de <span>Mitigação</span></h2>
+                <div class="content">
+                    <p>Ações recomendadas para proteger uma rede de forma basal:</p>
+                    <ul class="grid-list cols-3" style="font-size: 14px;">
+                        <li class="card-item">Desenvolver política de segurança escrita</li>
+                        <li class="card-item">Educar funcionários</li>
+                        <li class="card-item">Controlar acesso físico aos sistemas</li>
+                        <li class="card-item">Usar senhas fortes / alterar com frequência</li>
+                        <li class="card-item">Criptografar e proteger dados confidenciais</li>
+                        <li class="card-item">Implementar hardware e software de segurança</li>
+                        <li class="card-item">Realizar e TESTAR backups de arquivos</li>
+                        <li class="card-item">Desligar serviços e portas desnecessários</li>
+                        <li class="card-item">Manter patches atualizados e realizar auditorias</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Mitigação: Malware e Vermes" data-chapter="Módulo 3: Mitigação de Ameaças">
+                <span class="slide-tag">Módulo 3.4</span>
+                <h2 class="slide-title">Mitigação de <span>Malwares e Vermes</span></h2>
+                <div class="content">
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-shield-virus"></i><strong>Antivírus:</strong> Meio principal contra vírus e trojans. É o produto mais amplamente implantado hoje. <strong>Porém</strong>, não impedem que vírus entrem na rede. O profissional deve acompanhar atualizações.</li>
+                        <li><i class="fa-solid fa-worm"></i><strong>Tratamento de Worms:</strong> Vermes são baseados em rede e auto-replicantes. A resposta a um surto deve ser rigorosamente executada nestas <strong>4 fases cruciais</strong>:
+                            <ul style="margin-left: 30px; margin-top: 15px; display:flex; flex-direction:column; gap: 15px; font-size: 15px;">
+                                <li><strong style="color:var(--accent-primary);">1. Contenção (Containment):</strong> O objetivo primário e imediato é parar a propagação do worm. Isso é feito bloqueando portas de rede específicas (via ACLs e Firewalls), segmentando a rede ou desconectando roteadores/switches afetados.</li>
+                                <li><strong style="color:var(--accent-primary);">2. Inoculação (Inoculation):</strong> Fase para proteger os sistemas que ainda <em>não foram infectados</em>. Consiste em aplicar patches e atualizações de segurança para corrigir a vulnerabilidade no SO, efetivamente "vacinando" as máquinas vulneráveis.</li>
+                                <li><strong style="color:var(--accent-primary);">3. Quarentena (Quarantine):</strong> Isolar completamente as máquinas que já estão infectadas. São colocadas fisicamente ou logicamente (em uma VLAN restrita) em quarentena, não podendo se comunicar com a rede de produção.</li>
+                                <li><strong style="color:var(--accent-primary);">4. Tratamento (Treatment):</strong> É a fase final. Envolve limpar ativamente a infecção (desinfecção do worm) e restaurar o sistema e arquivos corrompidos a partir de backups seguros das máquinas em quarentena.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Mitigação: Reconhecimento e Acesso" data-chapter="Módulo 3: Mitigação de Ameaças">
+                <span class="slide-tag">Módulo 3.4</span>
+                <h2 class="slide-title">Mitigação de <span>Reconhecimento e Acesso</span></h2>
+                <div class="content">
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-eye-slash"></i><strong>Contra Reconhecimento:</strong> Detectado via alarmes pré-configurados. Mitigado via:
+                            <ul style="font-size:16px; margin-top:5px; margin-left:30px;">
+                                <li>Autenticação rigorosa</li>
+                                <li>Criptografia (Torna sniffers inúteis)</li>
+                                <li>Ferramentas anti-sniffer e Infraestrutura comutada (Firewalls/IPS).</li>
+                            </ul>
+                        </li>
+                        <li><i class="fa-solid fa-lock"></i><strong>Contra Acesso:</strong> Mitigado com segurança de senha forte, <strong>princípio do privilégio mínimo (confiança mínima)</strong>, criptografia rigorosa e patches em dia (SO/Apps).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Mitigação: DoS e Spoofing" data-chapter="Módulo 3: Mitigação de Ameaças">
+                <span class="slide-tag">Módulo 3.4</span>
+                <h2 class="slide-title">Mitigação de <span>DoS e Spoofing</span></h2>
+                <div class="content">
+                    <p>Ataques DoS levam a problemas em segmentos inteiros. <strong>Para minimizar, softwares de monitoramento de rede devem estar sempre rodando.</strong></p>
+                    <p>Historicamente, ataques DoS provêm de endereços IP falsificados (Spoofing). Switches e Roteadores Cisco suportam tecnologias antispoofing nativas:</p>
+                    <ul class="grid-list cols-3" style="font-size: 15px;">
+                        <li class="card-item"><i class="fa-solid fa-ethernet"></i> Segurança de porta</li>
+                        <li class="card-item"><i class="fa-solid fa-search"></i> Espião DHCP (Snooping)</li>
+                        <li class="card-item"><i class="fa-solid fa-shield-halved"></i> Proteção de Origem IP (IPSG)</li>
+                        <li class="card-item"><i class="fa-solid fa-magnifying-glass-chart"></i> Inspeção ARP Dinâmica (DAI)</li>
+                        <li class="card-item"><i class="fa-solid fa-filter"></i> ACLs e URPF</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Cisco NFP: Visão Geral" data-chapter="Módulo 3: Mitigação de Ameaças">
+                <span class="slide-tag">Módulo 3.5</span>
+                <h2 class="slide-title">Framework Cisco <span>NFP</span></h2>
+                <div class="content">
+                    <p>A estrutura Cisco <strong>NFP (Network Foundation Protection)</strong> fornece diretrizes abrangentes para proteger a infraestrutura de rede, garantindo a prestação contínua do serviço.</p>
+                    <p>O NFP divide logicamente roteadores e switches em <strong>três áreas funcionais de proteção profunda</strong>:</p>
+                    
+                    <ul class="grid-list cols-3" style="margin-top:20px;">
+                        <li class="card-item" style="text-align:center;">
+                            <i class="fa-solid fa-microchip" style="font-size:40px;"></i>
+                            <h3 style="color:#fff; margin:10px 0;">Plano de Controle</h3>
+                        </li>
+                        <li class="card-item" style="text-align:center;">
+                            <i class="fa-solid fa-users-gear" style="font-size:40px;"></i>
+                            <h3 style="color:#fff; margin:10px 0;">Plano de Gerenciamento</h3>
+                        </li>
+                        <li class="card-item" style="text-align:center;">
+                            <i class="fa-solid fa-database" style="font-size:40px;"></i>
+                            <h3 style="color:#fff; margin:10px 0;">Plano de Dados<br>(Transmissão)</h3>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ================= CAPÍTULO 4 ================= -->
+            <div class="slide" data-title="Proteção do Roteador de Borda" data-chapter="Módulo 4: Acesso ao Dispositivo">
+                <span class="slide-tag">Módulo 4.1</span>
+                <h2 class="slide-title">O Roteador de <span>Borda</span></h2>
+                <div class="content">
+                    <p>Roteadores são alvos principais ("polícia de trânsito"). O roteador de borda é o <strong>último</strong> roteador entre a LAN e a Internet não confiável. 3 abordagens de segurança de design:</p>
+                    <ul class="standard-list" style="font-size: 16px;">
+                        <li><i class="fa-solid fa-router"></i><strong>Roteador Único:</strong> Segurança toda no roteador de borda. Comum em sites menores (SOHO).</li>
+                        <li><i class="fa-solid fa-layer-group"></i><strong>Defesa em Profundidade:</strong> Usa roteador externo, firewall, e roteador interno conectado à LAN. Permite incluir IPS, servidores proxy (WSA) e filtros de e-mail (ESA).</li>
+                        <li><i class="fa-solid fa-border-all"></i><strong>Abordagem DMZ:</strong> Área intermediária (zona desmilitarizada) entre 2 roteadores. <strong>O firewall serve como proteção primária no DMZ.</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Aprofundamento: As 3 Áreas a Manter" data-chapter="Módulo 4: Acesso ao Dispositivo">
+                <span class="slide-tag">Módulo 4.1 - Deep Dive</span>
+                <h2 class="slide-title">As 3 Áreas de <span>Endurecimento</span></h2>
+                <div class="content">
+                    <p>Para o roteador de borda ser inviolável, 3 áreas vitais de atuação do administrador devem ser mantidas de forma proativa:</p>
+                    <ul class="standard-list" style="font-size: 16px;">
+                        <li><i class="fa-solid fa-building-lock"></i><strong>Segurança Física:</strong>
+                            Restringir o acesso material ao equipamento. Inclui controles em portas de sala de telecomunicações, sistemas de UPS ininterruptos, mitigação ambiental (ar-condicionado) e bloqueio físico das portas de Console e AUX do dispositivo.
+                        </li>
+                        <li><i class="fa-solid fa-hard-drive"></i><strong>Segurança do Sistema Operacional (SO):</strong>
+                            Manter a integridade do Cisco IOS. Significa aplicar patches de segurança em tempo hábil, validar hashes da imagem baixada, usar armazenamento persistente seguro, e alocar RAM suficiente para mitigar sobrecargas de pacotes.
+                        </li>
+                        <li><i class="fa-solid fa-shield-halved"></i><strong>Endurecimento do Roteador (Hardening):</strong>
+                            Reduzir ativamente a superfície de ataque lógica. Desabilitar serviços padrão não utilizados (como portas HTTP abertas, Telnet, CDP/LLDP nas portas de internet, Finger e BootP) e habilitar protocolos estritos como SSH e SCP.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Comandos Práticos: Acesso Admin" data-chapter="Módulo 4: Acesso ao Dispositivo">
+                <span class="slide-tag">Módulo 4.2 / 4.3</span>
+                <h2 class="slide-title">Comandos Práticos de <span>Acesso Admin</span></h2>
+                <div class="content">
+                    <p>O MD5 foi quebrado. Hashes tipo 8 (PBKDF2-SHA256) e Tipo 9 (Scrypt) são recomendados. Aprimoramentos VTY devem ser aplicados:</p>
+                    
+                    <div class="code-block">
+<span class="code-comment">! 1. Exigir tamanho mínimo de senha legal e forçar criptografia do texto simples</span>
+<span class="code-keyword">Router(config)#</span> security passwords min-length 10
+<span class="code-keyword">Router(config)#</span> service password-encryption
+
+<span class="code-comment">! 2. Criar a senha do enable usando algoritmo seguro (Tipo 9 / Scrypt)</span>
+<span class="code-keyword">Router(config)#</span> enable algorithm-type scrypt secret Cisco_Segura1@
+
+<span class="code-comment">! 3. Configurar bloqueio de Login (Defesa DoS)
+! Bloqueia por 120s se houver 3 falhas dentro de 60 segundos</span>
+<span class="code-keyword">Router(config)#</span> login block-for 120 attempts 3 within 60
+
+<span class="code-comment">! 4. Permitir que o Admin escape do bloqueio (Quiet Mode) via ACL</span>
+<span class="code-keyword">Router(config)#</span> ip access-list standard ACESSO_ADMIN
+<span class="code-keyword">Router(config-std-nacl)#</span> permit host 192.168.1.10
+<span class="code-keyword">Router(config)#</span> login quiet-mode access-class ACESSO_ADMIN
+
+<span class="code-comment">! 5. Atrasar o prompt em 5 segundos após falha e logar tudo</span>
+<span class="code-keyword">Router(config)#</span> login delay 5
+<span class="code-keyword">Router(config)#</span> login on-failure log
+<span class="code-keyword">Router(config)#</span> login on-success log
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Configuração Completa do SSH" data-chapter="Módulo 4: Acesso ao Dispositivo">
+                <span class="slide-tag">Módulo 4.4</span>
+                <h2 class="slide-title">Configuração Passo a Passo do <span>SSH</span></h2>
+                <div class="content">
+                    <p>Telnet transmite dados em texto claro. Para habilitar SSH no Cisco IOS (6 etapas práticas):</p>
+                    
+                    <div class="code-block">
+<span class="code-comment">! 1. Hostname Único e 2. Domain Name IP</span>
+<span class="code-keyword">Router(config)#</span> hostname R1-Borda
+<span class="code-keyword">R1-Borda(config)#</span> ip domain-name cisco.com
+
+<span class="code-comment">! 3. Gerar chaves RSA (Modulus min 2048 para segurança moderna)</span>
+<span class="code-keyword">R1-Borda(config)#</span> crypto key generate rsa modulus 2048
+
+<span class="code-comment">! 4. Criar usuário no banco de dados local com privilégio e senha tipo 9</span>
+<span class="code-keyword">R1-Borda(config)#</span> username admin privilege 15 algorithm-type scrypt secret cisco123
+
+<span class="code-comment">! (Opcional) Ajustar o Timeout SSH para maior segurança (padrão é 120s)</span>
+<span class="code-keyword">R1-Borda(config)#</span> ip ssh time-out 60
+
+<span class="code-comment">! 5 e 6. Autenticar no banco local e Permitir apenas SSH na VTY</span>
+<span class="code-keyword">R1-Borda(config)#</span> line vty 0 4
+<span class="code-keyword">R1-Borda(config-line)#</span> login local
+<span class="code-keyword">R1-Borda(config-line)#</span> transport input ssh
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= CAPÍTULO 6 ================= -->
+            <div class="slide" data-title="Resiliência: Imagem Segura IOS" data-chapter="Módulo 6: Gerenciamento de Dispositivos">
+                <span class="slide-tag">Módulo 6.1 / 6.2</span>
+                <h2 class="slide-title">Imagem Segura e <span>AutoSecure</span></h2>
+                <div class="content">
+                    <p>Permite recuperação se a flash ou configuração for apagada maliciosamente.</p>
+                    <ul class="standard-list" style="font-size: 16px;">
+                        <li><i class="fa-solid fa-shield"></i>O atributo mantém cópia oculta (conjunto inicialização principal). Comando <code>secure boot-image</code>. O comando <code>secure boot-config</code> tira snapshot. <em>(Requer hardware flash PCMCIA ATA, comum em roteadores ISR antigos, não no 4000).</em></li>
+                        <li><i class="fa-solid fa-wand-magic-sparkles"></i><strong>AutoSecure:</strong> O comando <code>auto secure</code> inicia script dialógico que desabilita serviços inseguros (CDP/LLDP) e habilita CEF, ACLs e Inspeção Firewall. <strong>Recomendado apenas para novos roteadores em linha de base (nunca em produção ativa).</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Protocolos, SCP e ROMmon" data-chapter="Módulo 6: Gerenciamento de Dispositivos">
+                <span class="slide-tag">Módulo 6.3 / 6.4</span>
+                <h2 class="slide-title">SCP, Rotas e <span>Gerenciamento</span></h2>
+                <div class="content">
+                    <ul class="standard-list">
+                        <li><i class="fa-solid fa-route"></i><strong>Autenticação de Rotas (OSPF):</strong> Evita DoS e tráfego corrompido de roteadores mentirosos. <strong>SHA</strong> é preferido ao invés do MD5.</li>
+                        <li><i class="fa-solid fa-file-shield"></i><strong>Secure Copy Protocol (SCP):</strong> Fornece método seguro para copiar arquivos do roteador. Confia no <strong>SSH</strong> (comunicação) e no <strong>AAA</strong> (autenticação).</li>
+                        <li><i class="fa-solid fa-key"></i><strong>Recuperação de Senha:</strong> Se comprometido, é preciso acesso físico via porta de console para entrar no <strong>modo ROMmon</strong>. A recuperação pode ser desativada com <code>no service password-recovery</code> (com extrema cautela).</li>
+                        <li><i class="fa-solid fa-server"></i><strong>Rede de Gerenciamento:</strong> Preferir sempre a técnica <strong>Out-of-band</strong> (rede dedicada isolada) sobre a In-band.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Syslog e NTP para Segurança" data-chapter="Módulo 6: Gerenciamento de Dispositivos">
+                <span class="slide-tag">Módulo 6.5 / 6.6</span>
+                <h2 class="slide-title">Syslog e <span>NTP</span> para Segurança</h2>
+                <div class="content">
+                    <p>O monitoramento centralizado é vital. Para isso usamos Syslog e garantimos a precisão do relógio com NTP.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px;">
+                        <div>
+                            <strong style="color:var(--accent-primary);">Níveis de Severidade do Syslog:</strong>
+                            <p style="font-size:14px; margin-top:5px; color:var(--text-muted);">Usa UDP porta 514. Quanto menor o número, maior a gravidade.</p>
+                            <ul style="font-size: 15px; margin-top:5px; list-style:none; display:flex; flex-direction:column; gap:3px;">
+                                <li><strong>0 - Emergência</strong> (Sistema inutilizável)</li>
+                                <li><strong>1 - Alerta</strong> (Ação imediata necessária)</li>
+                                <li><strong>2 - Crítico</strong> (Condições críticas)</li>
+                                <li><strong>3 - Erro</strong> (Condições de erro)</li>
+                                <li><strong>4 - Aviso (Warning)</strong></li>
+                                <li><strong>5 - Notificação</strong> (Normal mas significativo)</li>
+                                <li><strong>6 - Informacional</strong> (Mensagens comuns)</li>
+                                <li><strong>7 - Depuração (Debugging)</strong> (Para desenvolvedores/troubleshoot)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong style="color:var(--accent-primary);">Network Time Protocol (NTP):</strong>
+                            <p style="font-size:15px; margin-top:5px;">Sincroniza o relógio em toda a rede.</p>
+                            <p style="font-size:15px; font-weight:bold; color:var(--danger);">Crucial para Segurança Forense:</p>
+                            <p style="font-size:14px;">Se os logs de roteadores diferentes tiverem horários divergentes, é <strong>impossível</strong> correlacionar um ataque ponta a ponta.</p>
+                            <p style="font-size:14px; margin-top:10px;"><em>Recomendado usar autenticação NTP para evitar que atacantes alterem a hora.</em></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="SNMP para Segurança" data-chapter="Módulo 6: Gerenciamento de Dispositivos">
+                <span class="slide-tag">Módulo 6.7</span>
+                <h2 class="slide-title">Monitoramento com <span>SNMP</span></h2>
+                <div class="content">
+                    <p>O <strong>Simple Network Management Protocol (SNMP)</strong> permite coletar informações de status, CPU, memória e banda, além de configurar dispositivos remotamente via <em>Traps</em> e Polling.</p>
+                    
+                    <div class="grid-list cols-2" style="margin-top:10px;">
+                        <div class="card-item" style="border-color:var(--danger);">
+                            <strong style="color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> SNMPv1 e SNMPv2c</strong>
+                            <p style="font-size:14px;">Utilizam strings de comunidade (como senhas) transmitidas em <strong>TEXTO CLARO</strong> pela rede. Extremamente vulneráveis a farejadores (sniffers).</p>
+                        </div>
+                        <div class="card-item" style="border-color:var(--success);">
+                            <strong style="color:var(--success);"><i class="fa-solid fa-shield-check"></i> SNMPv3</strong>
+                            <p style="font-size:14px;">Obrigatório para segurança corporativa. Suporta robustos recursos criptográficos para proteger as mensagens de gerenciamento:</p>
+                            <ul style="font-size:14px; margin-left:20px;">
+                                <li><strong>Autenticação:</strong> Garante origem (usa MD5 ou SHA).</li>
+                                <li><strong>Criptografia (Privacidade):</strong> Impede espionagem (usa AES/DES).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= CAPÍTULO 7 ================= -->
+            <div class="slide" data-title="Estrutura e Características AAA" data-chapter="Módulo 7: AAA">
+                <span class="slide-tag">Módulo 7.1</span>
+                <h2 class="slide-title">Características e Estrutura <span>AAA</span></h2>
+                <div class="content">
+                    <p>A autenticação local base não escala e é a mais fraca. O AAA provê um meio centralizado:</p>
+                    <ul class="grid-list cols-3" style="font-size: 15px;">
+                        <li class="card-item"><i class="fa-solid fa-fingerprint"></i><strong>Authentication (Autenticação)</strong><br>Exige que administradores provem sua identidade (Quem é você?).</li>
+                        <li class="card-item"><i class="fa-solid fa-key"></i><strong>Authorization (Autorização)</strong><br>Limita acesso e controla comandos habilitados (O que você pode fazer?).</li>
+                        <li class="card-item"><i class="fa-solid fa-receipt"></i><strong>Accounting (Contabilidade)</strong><br>Registra o início e término da sessão e comandos usados (O que você fez?).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Protocolos Servidor: TACACS+ e RADIUS" data-chapter="Módulo 7: AAA">
+                <span class="slide-tag">Módulo 7.3</span>
+                <h2 class="slide-title">Protocolos Baseados em <span>Servidor</span></h2>
+                <div class="content">
+                    <p>O servidor legado Cisco Secure ACS foi substituído pelo <strong>Cisco ISE</strong>. Dois protocolos suportados:</p>
+                    <table style="font-size: 15px;">
+                        <tr>
+                            <th>Característica</th>
+                            <th>TACACS+</th>
+                            <th>RADIUS</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Origem/Padrão</strong></td>
+                            <td>Aprimoramento proprietário Cisco</td>
+                            <td>Padrão aberto IETF (Alternativa futura: Diameter).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Transporte</strong></td>
+                            <td>TCP (Confiável)</td>
+                            <td>UDP</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Criptografia</strong></td>
+                            <td>Criptografa <strong>TODAS</strong> as comunicações.</td>
+                            <td>Criptografa <strong>APENAS</strong> as senhas.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Separação AAA</strong></td>
+                            <td>Separa autenticação e autorização.</td>
+                            <td>Combina autenticação e autorização.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Aplicações Fortes</strong></td>
+                            <td>Administração estrita da rede de roteadores.</td>
+                            <td>Acesso remoto, VoIP (SIP), Portas 1812/1813.</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Comandos AAA: Local e TACACS+" data-chapter="Módulo 7: AAA">
+                <span class="slide-tag">Módulo 7.2 / 7.4</span>
+                <h2 class="slide-title">Configurando AAA: <span>Local e TACACS+</span></h2>
+                <div class="content">
+                    
+                    <div class="code-block" style="font-size:14px;">
+<span class="code-comment">! 1. Habilitar AAA globalmente no dispositivo (Obrigatório primeiro passo)</span>
+<span class="code-keyword">Router(config)#</span> aaa new-model
+
+<span class="code-comment">! --- CONFIGURAÇÃO DE AUTENTICAÇÃO AAA LOCAL ---
+! Cria o usuário e diz para o login default usar o banco local</span>
+<span class="code-keyword">Router(config)#</span> username admin secret cisco123
+<span class="code-keyword">Router(config)#</span> aaa authentication login default local
+
+<span class="code-comment">! --- CONFIGURAÇÃO DE SERVIDOR TACACS+ ---
+! Define o servidor, a porta, o IP e a chave secreta compartilhada</span>
+<span class="code-keyword">Router(config)#</span> tacacs server SERVIDOR-ISE
+<span class="code-keyword">Router(config-server-tacacs)#</span> address ipv4 10.0.0.10
+<span class="code-keyword">Router(config-server-tacacs)#</span> key senhaTacacsSecreta
+<span class="code-keyword">Router(config-server-tacacs)#</span> exit
+
+<span class="code-comment">! Força a autenticação tentar o servidor TACACS+ primeiro, e caso caia, tenta local</span>
+<span class="code-keyword">Router(config)#</span> aaa authentication login default group tacacs+ local
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Comandos AAA: RADIUS e Autorização/Contabilidade" data-chapter="Módulo 7: AAA">
+                <span class="slide-tag">Módulo 7.4 / 7.5</span>
+                <h2 class="slide-title">Configurando AAA: <span>RADIUS e Autorização</span></h2>
+                <div class="content">
+                    <p><strong style="color:var(--danger);">Cuidado na Autorização:</strong> O padrão passa a ser negar tudo. Crie usuário primeiro!</p>
+                    
+                    <div class="code-block" style="font-size:14px;">
+<span class="code-comment">! --- CONFIGURAÇÃO DE SERVIDOR RADIUS ---
+! Define o servidor, garantindo as portas IANA (1812 auth / 1813 acct)</span>
+<span class="code-keyword">Router(config)#</span> radius server SERVIDOR-RADIUS
+<span class="code-keyword">Router(config-radius-server)#</span> address ipv4 10.0.0.20 auth-port 1812 acct-port 1813
+<span class="code-keyword">Router(config-radius-server)#</span> key senhaRadiusSecreta
+<span class="code-keyword">Router(config-radius-server)#</span> exit
+
+<span class="code-keyword">Router(config)#</span> aaa authentication login default group radius local
+
+<span class="code-comment">! --- AUTORIZAÇÃO (O QUE PODE FAZER) ---
+! Verifica privilégio de modo EXEC via servidor TACACS, com fallback local</span>
+<span class="code-keyword">Router(config)#</span> aaa authorization exec default group tacacs+ local
+
+<span class="code-comment">! --- CONTABILIDADE (O QUE FEZ) ---
+! Rastreia comandos digitados em modo EXEC e envia pro servidor (início e parada)</span>
+<span class="code-keyword">Router(config)#</span> aaa accounting exec default start-stop group tacacs+
+<span class="code-keyword">Router(config)#</span> aaa accounting commands 15 default start-stop group tacacs+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= CAPÍTULO 8 ================= -->
+            <div class="slide" data-title="Introdução e Regras das ACLs" data-chapter="Módulo 8: ACLs">
+                <span class="slide-tag">Módulo 8.1</span>
+                <h2 class="slide-title">Introdução às <span>ACLs</span></h2>
+                <div class="content">
+                    <p>Série de comandos do IOS para filtrar pacotes em interfaces, comparados com a Camada 3 ou 4. Por padrão, não há ACLs. Processadas via <strong>ACEs (instruções de permit/deny) em ordem Top-Down.</strong></p>
+                    
+                    <ul class="standard-list" style="font-size: 17px;">
+                        <li><i class="fa-solid fa-ban"></i><strong>Deny Implícito:</strong> A última instrução não escrita de toda ACL é <code>deny ip any any</code>.</li>
+                        <li><i class="fa-solid fa-font"></i><strong>ACLs Nomeadas:</strong> Método preferido em Cisco, pois o nome informa o objetivo. São alfanuméricas, <em>case-sensitive</em>.</li>
+                        <li><i class="fa-solid fa-list-ol"></i><strong>Padrão vs Estendida:</strong> 
+                            <br>Padrão (1-99 ou 1300-1999): Filtra <strong>APENAS</strong> IP de origem.
+                            <br>Estendida (100-199 ou 2000-2699): Filtra IP origem, destino, protocolos (IP, TCP, UDP, ICMP) e portas.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Cálculo Curinga (Wildcard) e Macetes" data-chapter="Módulo 8: ACLs">
+                <span class="slide-tag">Módulo 8.2</span>
+                <h2 class="slide-title">Cálculo de Curinga <span>(Wildcard) e Macetes</span></h2>
+                <div class="content">
+                    <p>A máscara curinga indica ao roteador quais bits inspecionar. O ANDing funciona de forma oposta à máscara de sub-rede:</p>
+                    <ul style="font-size: 16px; margin-left: 20px; color: var(--accent-primary); font-weight: bold;">
+                        <li>0 = Corresponder EXATAMENTE ao bit.</li>
+                        <li>1 = IGNORAR o bit correspondente.</li>
+                    </ul>
+                    
+                    <div style="background-color: var(--bg-card); padding: 20px; border-radius: 8px; margin-top:10px; border-left: 4px solid var(--accent-primary);">
+                        <strong style="font-size: 18px;">Macete Matemático Universal:</strong>
+                        <p style="margin-top:5px;">Para encontrar o curinga de qualquer rede, subtraia a máscara de sub-rede de <code style="color:#a6e22e;">255.255.255.255</code>.</p>
+                        <p style="margin-top:10px; font-family:monospace; font-size:16px;">
+                            Exemplo (/24):<br>
+                            &nbsp;&nbsp;255.255.255.255<br>
+                            - 255.255.255.0   (Máscara /24)<br>
+                            -------------------<br>
+                            &nbsp;&nbsp;<strong style="color:#fff;">0.  0.  0.  255</strong> (Curinga gerado)
+                        </p>
+                    </div>
+                    
+                    <p style="margin-top:10px;"><strong>Palavras-chave atalho:</strong><br>
+                    • Ao invés de usar origem <code>192.168.1.1 0.0.0.0</code>, use: <code>host 192.168.1.1</code><br>
+                    • Ao invés de usar origem <code>0.0.0.0 255.255.255.255</code>, use: <code>any</code>
+                    </p>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Comandos Completos: ACLs Padrão e Estendidas" data-chapter="Módulo 8: ACLs">
+                <span class="slide-tag">Módulo 8.3 / 8.4</span>
+                <h2 class="slide-title">Comandos de Configuração: <span>ACLs</span></h2>
+                <div class="content">
+                    <div class="code-block" style="font-size:13px;">
+<span class="code-comment">! --- ACL PADRÃO (Apenas Origem) ---
+! Sintaxe Numérica (Ex: Permite rede local e nega um IP específico)</span>
+<span class="code-keyword">Router(config)#</span> access-list 10 deny host 192.168.1.50
+<span class="code-keyword">Router(config)#</span> access-list 10 permit 192.168.1.0 0.0.0.255
+
+<span class="code-comment">! Sintaxe Nomeada Padrão</span>
+<span class="code-keyword">Router(config)#</span> ip access-list standard BLOQUEIA_MARKETING
+<span class="code-keyword">Router(config-std-nacl)#</span> deny 10.1.1.0 0.0.0.255
+<span class="code-keyword">Router(config-std-nacl)#</span> permit any
+
+<span class="code-comment">! --- ACL ESTENDIDA (Origem, Destino, Protocolo e Porta) ---
+! Sintaxe: [protocolo] [origem] [curinga-origem] [destino] [curinga-destino] eq [porta]</span>
+<span class="code-keyword">Router(config)#</span> ip access-list extended BLOQUEIA_WEB_DMZ
+<span class="code-keyword">Router(config-ext-nacl)#</span> permit tcp 192.168.1.0 0.0.0.255 host 172.16.1.10 eq 80
+<span class="code-keyword">Router(config-ext-nacl)#</span> permit tcp 192.168.1.0 0.0.0.255 host 172.16.1.10 eq 443
+<span class="code-keyword">Router(config-ext-nacl)#</span> deny ip any any
+
+<span class="code-comment">! Para inserir ou remover uma linha no meio, use números de sequência (ex: 15)</span>
+<span class="code-keyword">Router(config-ext-nacl)#</span> 15 deny tcp any host 172.16.1.10 eq 22
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Aplicações Práticas e Mitigação Avançada" data-chapter="Módulo 8: ACLs">
+                <span class="slide-tag">Módulo 8.5 / 8.6</span>
+                <h2 class="slide-title">Aplicações Práticas e <span>Mitigação</span></h2>
+                <div class="content">
+                    <p><strong>Aplicação em Interfaces:</strong> Deve-se determinar a direção correta do tráfego (IN/OUT).</p>
+                    <div class="code-block" style="font-size:13px;">
+<span class="code-keyword">Router(config)#</span> interface gigabitethernet 0/0
+<span class="code-keyword">Router(config-if)#</span> ip access-group BLOQUEIA_WEB_DMZ in
+
+<span class="code-comment">! Aplicação para proteger Linhas VTY (SSH/Telnet) usa access-class</span>
+<span class="code-keyword">Router(config)#</span> line vty 0 4
+<span class="code-keyword">Router(config-line)#</span> access-class ACESSO_ADMIN in
+                    </div>
+                    
+                    <strong style="color:var(--danger); font-size:18px;">Mitigação Avançada com ACLs:</strong>
+                    <ul class="standard-list" style="font-size:14px;">
+                        <li><strong>Bloqueio Antispoofing RFC 1918:</strong> Na interface externa voltada para internet, crie regras para bloquear qualquer tráfego que declare vir de IPs privados (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16), pois são endereços falsificados.</li>
+                        <li><strong>Controle Granular de ICMP:</strong> O ICMP é útil para redes, mas abusado em Reconhecimento (Ping sweep) e DoS (Smurf).
+                            <br><em>ENTRADA:</em> Bloqueie mensagens "Echo Request" (ping externo) e "Redirect". Permita apenas "Echo Reply" (respostas para o que você pingou), "Source Quench" e "Unreachable".
+                            <br><em>SAÍDA:</em> Bloqueie tudo que não seja "Echo Request", "Parameter Problem", "Packet Too Big".
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Diretrizes Universais de ACL e IPv6" data-chapter="Módulo 8: ACLs">
+                <span class="slide-tag">Módulo 8.5 / 8.7</span>
+                <h2 class="slide-title">Diretrizes de Ouro e <span>ACLs IPv6</span></h2>
+                <div class="content">
+                    <ul class="grid-list cols-2" style="font-size: 15px;">
+                        <li class="card-item"><i class="fa-solid fa-arrow-down-short-wide"></i> <strong>Ordem Importa (Top-Down)</strong><br>A primeira correspondência executa a ação e o pacote SAI da ACL sem ler o resto.</li>
+                        <li class="card-item"><i class="fa-solid fa-filter"></i> <strong>Específico para Genérico</strong><br>Sempre negue o host específico /32 no topo antes de permitir a rede inteira /24 embaixo.</li>
+                        <li class="card-item"><i class="fa-solid fa-layer-group"></i> <strong>Regra de UM</strong><br>Uma ACL por interface, por protocolo (IPv4/v6), por direção.</li>
+                        <li class="card-item"><i class="fa-solid fa-server"></i> <strong>Exceção do Roteador</strong><br>Pacotes gerados pelo próprio roteador não são bloqueados por ACLs de saída.</li>
+                        <li class="card-item" style="border-color:var(--accent-primary);"><i class="fa-solid fa-location-dot"></i> <strong>Padrão vs Estendida</strong><br>Padrão: O mais próximo do DESTINO.<br>Estendida: O mais próximo da ORIGEM.</li>
+                        <li class="card-item" style="border-color:var(--accent-primary);"><i class="fa-solid fa-fire-burner"></i> <strong>TCP Established</strong><br>Firewall stateful básico: Permite entrada só de tráfego que seja <em>resposta</em> a conexões locais.</li>
+                    </ul>
+
+                    <p style="margin-top: 10px;"><strong>O Mundo IPv6:</strong> Usa pilha dupla (Dual Stack). Invasores exploram via mensagens NDP falsas. As ACLs IPv6 mitigam isso, mas têm diferenças: <strong>Não existem ACLs "Padrão" numeradas, e TODAS as ACLs IPv6 devem ser configuradas com um NOME obrigatoriamente.</strong></p>
+                </div>
+            </div>
+
+            <!-- ================= SIMULADO FINAL ================= -->
+            <div class="slide" data-title="Questão 1: Gestão de Riscos" data-chapter="Módulo 9: Simulado Final">
+                <span class="slide-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">Revisão para Prova</span>
+                <h2 class="slide-title">Questão 1: <span>Gestão de Riscos</span></h2>
+                <div class="content">
+                    <p style="font-size: 18px;">Uma organização opta por instalar firewalls avançados e sistemas IPS em sua rede de borda para diminuir o impacto de possíveis ataques externos, embora saiba que não é possível eliminar o risco completamente. Essa decisão corresponde a qual estratégia de gestão de risco?</p>
+                    <ul class="standard-list" style="font-size: 16px;">
+                        <li>A) Aceitação do Risco</li>
+                        <li>B) Transferência do Risco</li>
+                        <li>C) Prevenção do Risco</li>
+                        <li>D) Redução do Risco</li>
+                    </ul>
+                    
+                    <div style="background-color: var(--bg-card); border-left: 4px solid var(--success); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <strong style="color:var(--success);"><i class="fa-solid fa-check"></i> Gabarito: Letra D (Redução de Risco)</strong>
+                        <p style="font-size: 14px; margin-top: 5px;">A implementação de controles (como Firewalls e IPS) para diminuir o impacto ou a probabilidade de uma ameaça é classificada como Redução de Risco, sendo a estratégia de mitigação mais utilizada nas organizações. (Ref: Módulo 2)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Questão 2: Autenticação OSPF" data-chapter="Módulo 9: Simulado Final">
+                <span class="slide-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">Revisão para Prova</span>
+                <h2 class="slide-title">Questão 2: <span>Autenticação OSPF</span></h2>
+                <div class="content">
+                    <p style="font-size: 18px;">Qual é o objetivo principal de emitir os comandos de configuração <code>ip ospf message-digest-key</code> e autenticação de área (MD5 ou SHA) em um roteador?</p>
+                    <ul class="standard-list" style="font-size: 16px;">
+                        <li>A) Criptografar todo o tráfego de dados dos usuários que passa pelo roteador.</li>
+                        <li>B) Impedir que os roteadores de uma rede processem mensagens de roteamento OSPF falsas injetadas por um invasor.</li>
+                        <li>C) Evitar ataques DDoS vindos da rede externa.</li>
+                        <li>D) Fornecer uma conexão SSH segura para o administrador da rede.</li>
+                    </ul>
+                    
+                    <div style="background-color: var(--bg-card); border-left: 4px solid var(--success); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <strong style="color:var(--success);"><i class="fa-solid fa-check"></i> Gabarito: Letra B</strong>
+                        <p style="font-size: 14px; margin-top: 5px;">A autenticação de protocolo de roteamento garante a origem das atualizações, evitando que invasores falsifiquem vizinhanças OSPF para envenenar as tabelas de rotas e causar desinformação na rede. (Ref: Módulo 6)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Questão 3: Análise Forense" data-chapter="Módulo 9: Simulado Final">
+                <span class="slide-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">Revisão para Prova</span>
+                <h2 class="slide-title">Questão 3: <span>Análise Forense (AAA e NTP)</span></h2>
+                <div class="content">
+                    <p style="font-size: 18px;">Um analista de segurança precisa investigar um incidente ocorrido em um roteador e identificar qual usuário logou e executou comandos maliciosos em um horário específico. Para o sucesso dessa correlação de dados, quais dois recursos devem estar obrigatoriamente configurados?</p>
+                    <ul class="standard-list" style="font-size: 16px;">
+                        <li>A) Autenticação AAA e Syslog</li>
+                        <li>B) TACACS+ e RADIUS</li>
+                        <li>C) Contabilidade AAA e NTP</li>
+                        <li>D) AutoSecure e CoPP</li>
+                    </ul>
+                    
+                    <div style="background-color: var(--bg-card); border-left: 4px solid var(--success); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <strong style="color:var(--success);"><i class="fa-solid fa-check"></i> Gabarito: Letra C</strong>
+                        <p style="font-size: 14px; margin-top: 5px;">A <strong>Contabilidade AAA</strong> (Accounting) é a responsável por rastrear e registrar quais usuários acessaram o roteador e quais comandos executaram. O protocolo <strong>NTP</strong> garante a precisão exata do relógio em toda a rede, o que é fundamental para validar a hora exata do incidente nos logs. (Ref: Módulos 6 e 7)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Questão 4: Aprimoramento de Login" data-chapter="Módulo 9: Simulado Final">
+                <span class="slide-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">Revisão para Prova</span>
+                <h2 class="slide-title">Questão 4: <span>Aprimoramento de Login</span></h2>
+                <div class="content">
+                    <p style="font-size: 18px;">Um administrador de rede configurou o comando <code>login block-for 180 attempts 2 within 30</code> nas linhas VTY de um roteador. Qual ameaça primária o administrador está tentando evitar?</p>
+                    <ul class="standard-list" style="font-size: 16px;">
+                        <li>A) Um vírus tentando se autorreplicar pela rede.</li>
+                        <li>B) A permanência de uma sessão Telnet inativa por mais de 180 segundos.</li>
+                        <li>C) Um dispositivo fazendo sniffing de tráfego na interface GigabitEthernet.</li>
+                        <li>D) Um agente de ameaça tentando adivinhar a senha (ataque de força bruta) para acessar o roteador.</li>
+                    </ul>
+                    
+                    <div style="background-color: var(--bg-card); border-left: 4px solid var(--success); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <strong style="color:var(--success);"><i class="fa-solid fa-check"></i> Gabarito: Letra D</strong>
+                        <p style="font-size: 14px; margin-top: 5px;">O recurso <em>login block-for</em> (período silencioso) desativa as tentativas de login caso ocorram falhas sucessivas em um curto período, neutralizando ataques de dicionário e adivinhação de senhas em portas de administração remota. (Ref: Módulo 4)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" data-title="Questão 5: Ameaças de Rede (DoS vs DDoS)" data-chapter="Módulo 9: Simulado Final">
+                <span class="slide-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">Revisão para Prova</span>
+                <h2 class="slide-title">Questão 5: <span>DoS x DDoS</span></h2>
+                <div class="content">
+                    <p style="font-size: 18px;">Vários vetores de ataque se originam pela Internet para interromper as operações da rede. Qual a diferença técnica que caracteriza um ataque DDoS em contraposição a um ataque DoS clássico?</p>
+                    <ul class="standard-list" style="font-size: 16px;">
+                        <li>A) O DoS afeta apenas servidores web, enquanto o DDoS afeta roteadores e switches da rede.</li>
+                        <li>B) O DDoS utiliza uma quantidade massiva de tráfego coordenado a partir de múltiplas fontes simultâneas (como botnets infectadas).</li>
+                        <li>C) O DDoS é um ataque que tenta roubar a senha do administrador, enquanto o DoS foca em derrubar os serviços de rede.</li>
+                        <li>D) O DoS precisa de dispositivos IoT para funcionar através do malware Mirai, o DDoS não precisa.</li>
+                    </ul>
+                    
+                    <div style="background-color: var(--bg-card); border-left: 4px solid var(--success); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <strong style="color:var(--success);"><i class="fa-solid fa-check"></i> Gabarito: Letra B</strong>
+                        <p style="font-size: 14px; margin-top: 5px;">A principal diferença é a <strong>quantidade de máquinas envolvidas</strong> e a <strong>distribuição</strong> do ataque. O DDoS (Distributed Denial of Service) ocorre quando um atacante (botmaster) coordena várias máquinas "zumbis" infectadas para sobrecarregar um alvo simultaneamente. (Ref: Módulo 2)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FIM -->
+            <div class="slide title-slide" data-title="Fim" data-chapter="Encerramento">
+                <h1>Fim do <span>Curso</span></h1>
+                <p>Obrigado por completar a masterclass completa sobre Cisco Network Security.</p>
+            </div>
+
+        </div>
+
+        <!-- BOTTOM CONTROLS -->
+        <div id="bottom-bar">
+            <button class="btn" id="btn-prev" disabled><i class="fa-solid fa-arrow-left"></i> Anterior</button>
+            <div id="progress-container">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progress-bar"></div>
+                </div>
+                <div class="progress-text" id="slide-counter">1 / X</div>
+            </div>
+            <button class="btn" id="btn-next">Próximo <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let currentSlide = 0;
+
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const progressBar = document.getElementById('progress-bar');
+            const slideCounter = document.getElementById('slide-counter');
+            const indexList = document.getElementById('index-list');
+
+            // Initialize Sidebar Index
+            let currentChapter = "";
+            slides.forEach((slide, index) => {
+                const chapter = slide.getAttribute('data-chapter');
+                const title = slide.getAttribute('data-title');
+
+                if (chapter && chapter !== currentChapter) {
+                    currentChapter = chapter;
+                    const header = document.createElement('div');
+                    header.className = 'module-header';
+                    header.innerText = chapter;
+                    indexList.appendChild(header);
+                }
+
+                const li = document.createElement('li');
+                li.className = 'index-item';
+                li.innerText = title;
+                li.setAttribute('data-target', index);
+                li.onclick = () => goToSlide(index);
+                indexList.appendChild(li);
+            });
+
+            const indexItems = document.querySelectorAll('.index-item');
+
+            function updateUI() {
+                // Update slides visibility
+                slides.forEach((s, idx) => {
+                    s.classList.remove('active');
+                    if(idx === currentSlide) s.classList.add('active');
+                });
+
+                // Update controls
+                btnPrev.disabled = currentSlide === 0;
+                btnNext.disabled = currentSlide === totalSlides - 1;
+
+                // Update progress
+                slideCounter.innerText = `${currentSlide + 1} / ${totalSlides}`;
+                progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+
+                // Update sidebar active class
+                indexItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (parseInt(item.getAttribute('data-target')) === currentSlide) {
+                        item.classList.add('active');
+                        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            }
+
+            function nextSlide() {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateUI();
+                }
+            }
+
+            function prevSlide() {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateUI();
+                }
+            }
+
+            function goToSlide(index) {
+                if (index >= 0 && index < totalSlides) {
+                    currentSlide = index;
+                    updateUI();
+                }
+            }
+
+            // Listeners
+            btnNext.addEventListener('click', nextSlide);
+            btnPrev.addEventListener('click', prevSlide);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+
+            // Initial paint
+            updateUI();
+        });
+    </script>
+</body>
+</html>
